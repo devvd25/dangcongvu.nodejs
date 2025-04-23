@@ -7,7 +7,7 @@ Dưới đây là hướng dẫn chi tiết về chức năng của từng file 
 ## Cấu trúc thư mục
 
 ```
-Vidu7_88/
+DuAnNodeJS/
 ├── data/
 │   └── sampleDishes.js
 ├── models/
