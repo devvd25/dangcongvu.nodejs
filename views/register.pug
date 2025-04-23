@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  div.container.mt-5
+    h2.text-center Đăng Ký Khách Hàng
+    if message
+      p.text-danger.text-center= message
+    form(action="/register" method="POST")
+      div.mb-3
+        label(for="username") Tên đăng nhập
+        input.form-control(type="text" name="username" required="required")
+      div.mb-3
+        label(for="password") Mật khẩu
+        input.form-control(type="password" name="password" required="required")
+      div.text-center
+        button.btn.btn-primary(type="submit") Đăng Ký
+      div.text-center.mt-3
+        a(href="/login") Đã có tài khoản? Đăng nhập

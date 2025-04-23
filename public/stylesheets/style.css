@@ -1,0 +1,88 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.title-monan {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.content_monan {
+  background: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content_monan h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.content_monan form div {
+  margin-bottom: 10px;
+}
+
+.content_monan form label {
+  display: inline-block;
+  width: 120px;
+  font-weight: bold;
+  color: #555;
+}
+
+.content_monan form input {
+  padding: 8px;
+  width: calc(100% - 130px);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.content_monan form button {
+  background: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.content_monan form button:hover {
+  background: #0056b3;
+}
+
+.content_monan ul {
+  background: #e9ecef;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.content_monan ul li {
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.content_monan ul li span {
+  font-weight: bold;
+}
+
+.list_monans {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .content_monan {
+    width: 100%;
+  }
+
+  .content_monan form input {
+    width: calc(100% - 130px);
+  }
+}
