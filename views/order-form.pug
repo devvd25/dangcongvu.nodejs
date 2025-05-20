@@ -1,0 +1,65 @@
+extends layout
+
+block content
+  div.container.mt-5
+    div.row.justify-content-center
+      div.col-md-6
+        div.card.shadow-sm
+          div.card-body
+            h2.text-center.mb-4 Nhập Thông Tin Đặt Hàng
+            form#orderForm(action="/order" method="POST")
+              input(type="hidden" name="monanId" value=monan._id)
+              div.mb-3
+                label.form-label(for="tenMon") Tên món
+                input.form-control(type="text" name="tenMon" id="tenMon" value=monan.tenMon readonly)
+              div.mb-3
+                label.form-label(for="gia") Giá (VNĐ)
+                input.form-control(type="text" name="gia" id="gia" value=monan.gia readonly)
+              div.mb-3
+                label.form-label(for="customerName") Tên khách hàng
+                input.form-control(type="text" name="customerName" id="customerName" placeholder="Nhập tên khách hàng" required="required")
+              div.mb-3
+                label.form-label(for="phone") Số điện thoại
+                input.form-control(type="text" name="phone" id="phone" placeholder="Nhập số điện thoại" required="required")
+              div.mb-3
+                label.form-label(for="address") Địa chỉ
+                div.input-group
+                  input.form-control(type="text" name="address" id="address" placeholder="Nhập địa chỉ" required="required")
+                  button.btn.btn-outline-secondary(type="button" id="getLocationBtn") Get địa chỉ hiện tại
+              div.mb-3
+                label.form-label(for="quantity") Số lượng
+                input.form-control(type="number" name="quantity" id="quantity" value="1" min="1" required="required")
+              div.text-center
+                button.btn.btn-primary.w-100(type="submit") Xác Nhận Đặt Món
+              div.text-center.mt-3
+                a.btn.btn-secondary.w-100(href="/menu") Hủy
+  //- Đoạn code get vị trí người dungf
+  script.   
+    document.getElementById('getLocationBtn').addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+
+            try {
+              const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+              const data = await response.json();
+              if (data && data.display_name) {
+                document.getElementById('address').value = data.display_name;
+              } else {
+                alert('Không thể lấy địa chỉ. Vui lòng nhập thủ công.');
+              }
+            } catch (error) {
+              console.error('Error fetching address:', error);
+              alert('Lỗi khi lấy địa chỉ. Vui lòng nhập thủ công.');
+            }
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            alert('Không thể lấy vị trí. Vui lòng cho phép truy cập vị trí hoặc nhập thủ công.');
+          }
+        );
+      } else {
+        alert('Trình duyệt không hỗ trợ Geolocation. Vui lòng nhập địa chỉ thủ công.');
+      }
+    });

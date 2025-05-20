@@ -1,0 +1,196 @@
+extends layout
+
+block content
+  div.container.mt-5
+    // Banner và Logo
+    div.text-center.mb-4
+      img#logo(src=logo alt="Logo" style="max-height: 100px; margin-bottom: 20px;")
+      img#banner(src=banner alt="Banner" style="width: 100%; object-fit: contain;")
+
+    div.title-monan
+      h1 QUẢN LÝ MÓN ĂN
+      a.btn.btn-danger(href="/logout") Đăng Xuất
+      a.btn.btn-primary.ml-2(href="/orders") Quản Lý Đơn Hàng
+      a.btn.btn-primary.ml-2(href="/settings") Quản Lý Logo & Banner
+      a.btn.btn-primary.ml-2(href="/users") Quản Lý Người Dùng
+    div.content_monan
+      h2 Thêm Món Ăn Mới
+      form(action="/" method="POST" enctype="multipart/form-data")
+        div.mb-3
+          label(for="searchDish") Tìm kiếm món ăn để thêm
+          div.input-group
+            input.form-control(type="text" id="searchDish" placeholder="Nhập tên món ăn...")
+            button.btn.btn-outline-secondary(type="button" id="searchBtn") Tìm
+        div.mb-3
+          label(for="tenMon") Tên món
+          input.form-control(type="text" name="tenMon" id="tenMon" required="required")
+        div.mb-3
+          label(for="gia") Giá (VNĐ)
+          input.form-control(type="number" name="gia" id="gia" required="required")
+        div.mb-3
+          label(for="moTa") Mô tả
+          input.form-control(type="text" name="moTa" id="moTa")
+        div.mb-3
+          label(for="image") Hình ảnh
+          input.form-control(type="file" name="image" id="imageUpload" accept="image/*")
+          input(type="hidden" name="image" id="imageUrl")
+          img#imagePreview(src="" style="max-width: 200px; display: none; margin-top: 10px;")
+        div
+          button(type="submit") Thêm Món
+
+    div.content_monan
+      h2 Danh Sách Món Ăn
+      // Thêm ô tìm kiếm món ăn
+      form.mb-3(action="/" method="GET")
+        div.input-group
+          input.form-control(type="text" name="search" placeholder="Tìm kiếm món ăn..." value=searchQuery)
+          button.btn.btn-primary(type="submit") Tìm
+      div.list_monans
+        each monan in monans
+          ul
+            li
+              span Tên món: 
+              =monan.tenMon
+            li
+              span Giá: 
+              =monan.gia + ' VNĐ'
+            li
+              span Mô tả: 
+              =monan.moTa || 'Không có mô tả'
+            li
+              if monan.image
+                li
+                  span Hình ảnh: 
+                  img(src=monan.image width="100")
+            li
+              span ID: 
+              =monan._id
+      // Phân trang
+      if totalPages > 1
+        nav(aria-label="Page navigation")
+          ul.pagination.justify-content-center.mt-3
+            li.page-item(class=currentPage === 1 ? 'disabled' : '')
+              a.page-link(href=`/?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}`) Trước
+            - for (let i = 1; i <= totalPages; i++)
+              li.page-item(class=currentPage === i ? 'active' : '')
+                a.page-link(href=`/?page=${i}${searchQuery ? '&search=' + searchQuery : ''}`)= i
+            li.page-item(class=currentPage === totalPages ? 'disabled' : '')
+              a.page-link(href=`/?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}`) Sau
+
+    div.content_monan
+      h2 Cập Nhật Món Ăn
+      form(action="/update" method="POST" enctype="multipart/form-data")
+        div
+          label(for="id") ID
+          input(type="text" name="id" required="required")
+        div
+          label(for="tenMon") Tên món
+          input(type="text" name="tenMon" required="required")
+        div
+          label(for="gia") Giá (VNĐ)
+          input(type="number" name="gia" required="required")
+        div
+          label(for="moTa") Mô tả
+          input(type="text" name="moTa")
+        div
+          label(for="image") Hình ảnh mới
+          input(type="file" name="image" accept="image/*")
+        div
+          button(type="submit") Cập Nhật
+
+    div.content_monan
+      h2 Xóa Món Ăn
+      form(action="/delete" method="POST")
+        div
+          label(for="id") ID
+          input(type="text" name="id" required="required")
+        div
+          button(type="submit") Xóa
+
+  script.
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+      const query = document.getElementById('searchDish').value;
+      if (!query) {
+        alert('Vui lòng nhập tên món ăn để tìm kiếm!');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/search-dish?q=${encodeURIComponent(query)}`);
+        const dishes = await response.json();
+
+        if (dishes.length === 0) {
+          alert('Không tìm thấy món ăn nào!');
+          return;
+        }
+
+        const dish = dishes[0];
+        document.getElementById('tenMon').value = dish.tenMon;
+        document.getElementById('gia').value = dish.gia;
+        document.getElementById('moTa').value = dish.moTa || '';
+        document.getElementById('imageUrl').value = dish.image || '';
+
+        const imagePreview = document.getElementById('imagePreview');
+        if (dish.image) {
+          imagePreview.src = dish.image;
+          imagePreview.style.display = 'block';
+        } else {
+          imagePreview.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error searching dish:', error);
+        alert('Lỗi khi tìm kiếm món ăn. Vui lòng thử lại.');
+      }
+    });
+
+  // Quản lý nhạc
+  div.content_music.mt-5
+    h2 Quản Lý Nhạc
+    // Form thêm nhạc
+    h3 Thêm Nhạc Mới
+    form(action="/add-music" method="POST")
+      div.mb-3
+        label(for="musicTitle") Tiêu đề
+        input.form-control(type="text" name="title" id="musicTitle" placeholder="Nhập tiêu đề bài nhạc" required="required")
+      div.mb-3
+        label(for="musicUrl") URL nhạc
+        input.form-control(type="text" name="url" id="musicUrl" placeholder="Nhập URL bài nhạc (ví dụ: /music/song.mp3)" required="required")
+      div
+        button.btn.btn-primary(type="submit") Thêm Nhạc
+
+    // Danh sách nhạc
+    h3.mt-4 Danh Sách Nhạc
+    if musics.length > 0
+      table.table.table-striped
+        thead
+          tr
+            th Tiêu đề
+            th URL
+            th Hành động
+        tbody
+          each music in musics
+            tr
+              td= music.title
+              td= music.url
+              td
+                button.btn.btn-sm.btn-warning(data-bs-toggle="modal" data-bs-target=`#editMusicModal-${music._id}`) Sửa
+                a.btn.btn-sm.btn-danger(href=`/delete-music/${music._id}`) Xóa
+
+    // Modal sửa nhạc
+    each music in musics
+      div.modal.fade(id=`editMusicModal-${music._id}` tabindex="-1" aria-labelledby="editMusicModalLabel" aria-hidden="true")
+        div.modal-dialog
+          div.modal-content
+            div.modal-header
+              h5.modal-title(id="editMusicModalLabel") Sửa Nhạc
+              button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+            div.modal-body
+              form(action=`/update-music/${music._id}` method="POST")
+                div.mb-3
+                  label(for=`editMusicTitle-${music._id}`) Tiêu đề
+                  input.form-control(type="text" name="title" id=`editMusicTitle-${music._id}` value=music.title required="required")
+                div.mb-3
+                  label(for=`editMusicUrl-${music._id}`) URL nhạc
+                  input.form-control(type="text" name="url" id=`editMusicUrl-${music._id}` value=music.url required="required")
+                div
+                  button.btn.btn-primary(type="submit") Lưu Thay Đổi

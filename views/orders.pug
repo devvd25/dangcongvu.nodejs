@@ -1,0 +1,59 @@
+extends layout
+
+block content
+  div.container.mt-5
+    // Banner và Logo
+    div.text-center.mb-4
+      img#logo(src=logo alt="Logo" style="max-height: 100px; margin-bottom: 20px;")
+      img#banner(src=banner alt="Banner" style="width: 100%; object-fit: contain;")
+
+    h1.highlight-title Quản Lý Đơn Hàng
+    a.btn.btn-primary.mb-3(href="/") Quay Lại Quản Lý Món Ăn
+    // Bộ lọc trạng thái
+    form.mb-3(action="/orders" method="GET")
+      div.d-flex.align-items-center
+        label.me-2(for="status") Lọc theo trạng thái:
+        select.form-select.w-auto(name="status" onchange="this.form.submit()")
+          option(value="all" selected=statusFilter === 'all') Tất cả
+          option(value="đang làm" selected=statusFilter === 'đang làm') Đang làm
+          option(value="đang giao" selected=statusFilter === 'đang giao') Đang giao
+          option(value="đã giao" selected=statusFilter === 'đã giao') Đã giao
+    if orders.length
+      table.table.table-striped
+        thead
+          tr
+            th Tên Món
+            th Giá
+            th Số Lượng
+            th Tên Khách Hàng
+            th Số Điện Thoại
+            th Địa Chỉ
+            th Trạng Thái
+            th Thời Gian Cập Nhật
+            th Hành Động
+        tbody
+          each order in orders
+            tr
+              td= order.tenMon
+              td= order.gia + ' VNĐ'
+              td= order.quantity
+              td= order.customerName
+              td= order.phone
+              td= order.address
+              td= order.status
+              td
+                - const latestStatus = order.statusHistory[order.statusHistory.length - 1]
+                | #{latestStatus ? latestStatus.timestamp.toLocaleString() : 'Chưa cập nhật'}
+              td
+                form(action="/update-order-status" method="POST" style="display:inline;")
+                  input(type="hidden" name="orderId" value=order._id)
+                  select(name="status")
+                    option(value="đang làm" selected=order.status === 'đang làm') Đang làm
+                    option(value="đang giao" selected=order.status === 'đang giao') Đang giao
+                    option(value="đã giao" selected=order.status === 'đã giao') Đã giao
+                  button.btn.btn-sm.btn-primary(type="submit") Cập Nhật
+                form(action="/delete-order" method="POST" style="display:inline; margin-left: 10px;")
+                  input(type="hidden" name="orderId" value=order._id)
+                  button.btn.btn-sm.btn-danger(type="submit") Xóa Đơn Hàng
+    else
+      p.text-center.text-muted Không có đơn hàng nào.

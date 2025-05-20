@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  div.container.mt-5
+    h1.text-center Quản Lý Logo và Banner
+    a.btn.btn-primary.mb-3(href="/") Quay Lại Quản Lý Món Ăn
+    div.row
+      div.col-md-6
+        h3 Thay Đổi Logo
+        form(action="/update-logo" method="POST" enctype="multipart/form-data")
+          div.mb-3
+            label(for="logo") Chọn logo mới
+            input.form-control(type="file" name="logo" accept="image/*" required="required")
+          div.mb-3
+            img(src=logo style="max-height: 100px; margin-top: 10px;")
+          div
+            button.btn.btn-primary(type="submit") Cập Nhật Logo
+      div.col-md-6
+        h3 Thay Đổi Banner
+        form(action="/update-banner" method="POST" enctype="multipart/form-data")
+          div.mb-3
+            label(for="banner") Chọn banner mới
+            input.form-control(type="file" name="banner" accept="image/*" required="required")
+          div.mb-3
+            img(src=banner style="width: 100%; max-height: 200px; object-fit: cover; margin-top: 10px;")
+          div
+            button.btn.btn-primary(type="submit") Cập Nhật Banner

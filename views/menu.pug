@@ -1,0 +1,114 @@
+extends layout
+
+block content
+  div.container.mt-5
+    // Banner và Logo
+    div.text-center.mb-4
+      img#logo(src=logo alt="Logo" style="max-height: 100px; margin-bottom: 20px;")
+      img#banner(src=banner alt="Banner" style="width: 100%; object-fit: contain;")
+
+    h1.text-center.text-primary Danh Sách Món Ăn
+    div.d-flex.justify-content-between.mb-3
+      a.btn.btn-primary(href="/") (Admin) Quản Lý Món Ăn
+      a.btn.btn-danger(href="/logout") Đăng Xuất
+    // Tìm kiếm món ăn
+    form.mb-3(action="/menu" method="GET")
+      div.input-group
+        input.form-control(type="text" name="search" placeholder="Tìm kiếm món ăn..." value=searchQuery)
+        button.btn.btn-primary(type="submit") Tìm
+    div.row
+      each monan in monans
+        div.col-md-4.mb-4
+          div.card
+            if monan.image
+              img.card-img-top(src=monan.image alt=monan.tenMon style="height: 200px; object-fit: cover;")
+            else
+              img.card-img-top(src="https://via.placeholder.com/150" alt="No image" style="height: 200px; object-fit: cover;")
+            div.card-body
+              h5.card-title= monan.tenMon
+              p.card-text Giá: #{monan.gia} VNĐ
+              p.card-text= monan.moTa || 'Không có mô tả'
+              a.btn.btn-success.w-100(href=`/order-form/${monan._id}`) Đặt Món
+    // Phân trang
+    if totalPages > 1
+      nav(aria-label="Page navigation")
+        ul.pagination.justify-content-center.mt-3
+          li.page-item(class=currentPage === 1 ? 'disabled' : '')
+            a.page-link(href=`/menu?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}`) Trước
+          - for (let i = 1; i <= totalPages; i++)
+            li.page-item(class=currentPage === i ? 'active' : '')
+              a.page-link(href=`/menu?page=${i}${searchQuery ? '&search=' + searchQuery : ''}`)= i
+          li.page-item(class=currentPage === totalPages ? 'disabled' : '')
+            a.page-link(href=`/menu?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}`) Sau
+
+    h2.text-center.mt-5 Đơn Hàng Của Bạn
+    if orders.length
+      table.table.table-striped
+        thead
+          tr
+            th Tên Món
+            th Giá
+            th Số Lượng
+            th Tên Khách Hàng
+            th Số Điện Thoại
+            th Địa Chỉ
+            th Trạng Thái
+            th Thời Gian Cập Nhật
+            th Thời Gian Đặt
+        tbody
+          each order in orders
+            tr(data-order-id=order._id)
+              td= order.tenMon
+              td= order.gia + ' VNĐ'
+              td= order.quantity
+              td= order.customerName
+              td= order.phone
+              td= order.address
+              td.order-status= order.status
+              td.order-timestamp
+                - const latestStatus = order.statusHistory[order.statusHistory.length - 1]
+                | #{latestStatus ? latestStatus.timestamp.toLocaleString() : 'Chưa cập nhật'}
+              td= order.createdAt.toLocaleString()
+    else
+      p.text-center.text-muted Bạn chưa đặt món nào.
+
+  // Thêm thông báo toast
+  div#toastContainer.position-fixed.bottom-0.end-0.p-3(style="z-index: 11")
+    div#liveToast.toast.hide(role="alert" aria-live="assertive" aria-atomic="true")
+      div.d-flex
+        div.toast-body
+        button.btn-close.btn-close-white.me-2.m-auto(type="button" data-bs-dismiss="toast" aria-label="Close")
+
+  script(src="/socket.io/socket.io.js")
+  script.
+    const socket = io();
+    socket.emit('register', "#{user._id}");
+
+    socket.on('orderStatusUpdate', (data) => {
+      const row = document.querySelector(`tr[data-order-id="${data.orderId}"]`);
+      if (row) {
+        row.querySelector('.order-status').textContent = data.status;
+        row.querySelector('.order-timestamp').textContent = data.timestamp;
+
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.getElementById('liveToast');
+        const toastBody = toast.querySelector('.toast-body');
+        toastBody.textContent = `Đơn hàng của bạn đã được cập nhật: ${data.status} lúc ${data.timestamp}`;
+        toast.classList.remove('hide');
+        toast.classList.add('show');
+      }
+    });
+
+    socket.on('orderDeleted', (data) => {
+      const row = document.querySelector(`tr[data-order-id="${data.orderId}"]`);
+      if (row) {
+        row.remove();
+
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.getElementById('liveToast');
+        const toastBody = toast.querySelector('.toast-body');
+        toastBody.textContent = `Đơn hàng của bạn đã bị xóa`;
+        toast.classList.remove('hide');
+        toast.classList.add('show');
+      }
+    });
